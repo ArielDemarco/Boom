@@ -1,0 +1,64 @@
+//
+//  CrashReportsView.swift
+//  BoomApp
+//
+//  Copyright © 2026 Ariel Demarco. All rights reserved.
+//  Licensed under the MIT License.
+//
+
+#if os(iOS)
+import SwiftUI
+
+struct CrashReportDetailView: View {
+    @Environment(\.metricKitManager) private var manager: any MetricKitManaging
+    @Environment(\.dismiss) private var dismiss
+    @State private var state: CrashReportLoadState = .loading
+    
+    let summary: CrashReportSummary
+    
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                switch state {
+                case .loading:
+                    ProgressView("Loading report…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                case .loaded(let payload):
+                    PayloadView(summary: summary, payload: payload)
+
+                case .failed:
+                    ContentUnavailableView(
+                        "Failed to load",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text("The crash report file could not be read.")
+                    )
+                }
+            }
+            .navigationTitle("Crash Detail")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .task {
+            let result = await manager.loadPayload(for: summary)
+            state = result.map { .loaded($0) } ?? .failed
+        }
+    }
+}
+
+#Preview {
+    CrashReportDetailView(
+        summary: .init(
+            id: UUID(),
+            date: .now,
+            signal: 8,
+            exceptionType: 10,
+            isRead: false
+        )
+    )
+}
+#endif

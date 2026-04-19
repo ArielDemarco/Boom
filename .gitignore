@@ -1,0 +1,33 @@
+# Xcode (Tuist-generated — never commit these)
+*.xcodeproj/
+*.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+
+# Build
+.build/
+DerivedData/
+build/
+
+# Swift PM
+.swiftpm/
+Package.resolved
+
+# Tuist cache
+.tuist-build/
+Tuist/.build/
+Tuist/Dependencies/
+Derived/
+
+# Xcode user state
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+
+# Local signing config (contains personal Team ID)
+Configs/Local.xcconfig
+
+# macOS
+.DS_Store
+*.swp
+*~.nib
