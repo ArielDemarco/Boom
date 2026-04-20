@@ -38,7 +38,10 @@ void boom_crash_cxx_exception(void) {
 void boom_crash_objc_msg_send(void) {
     __unsafe_unretained id zombie;
     @autoreleasepool {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-unsafe-retained-assign"
         zombie = [[BoomZombieTarget alloc] init];
+#pragma clang diagnostic pop
     }
     // zombie is deallocated — sending a message to it causes EXC_BAD_ACCESS
     [zombie doSomething];
