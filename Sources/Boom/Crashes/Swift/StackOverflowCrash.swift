@@ -5,6 +5,8 @@
 //  Copyright © 2026 Ariel Demarco. All rights reserved.
 //  Licensed under the MIT License.
 //
+import BoomObjC
+
 public final class StackOverflowCrash: Crash, @unchecked Sendable {
     public let category: CrashCategory = .swiftRuntime
     public let title = "Stack overflow"
@@ -13,11 +15,7 @@ public final class StackOverflowCrash: Crash, @unchecked Sendable {
     public init() {}
 
     public func trigger() -> Never {
-        recurse()
-    }
-
-    @inline(never)
-    private func recurse() -> Never {
-        recurse()
+        boom_crash_stack_overflow()
+        fatalError("unreachable")
     }
 }

@@ -67,6 +67,20 @@ void boom_crash_corrupt_malloc(void) {
     free(buf);
 }
 
+// MARK: - Stack overflow
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winfinite-recursion"
+__attribute__((noinline))
+static void boom_do_stack_overflow(void) {
+    boom_do_stack_overflow();
+}
+#pragma clang diagnostic pop
+
+void boom_crash_stack_overflow(void) {
+    boom_do_stack_overflow();
+}
+
 // MARK: - Unrecognized selector
 
 void boom_crash_unrecognized_selector(void) {
