@@ -15,5 +15,8 @@ FOUNDATION_EXPORT void boom_crash_cxx_exception(void);
 FOUNDATION_EXPORT void boom_crash_objc_msg_send(void);
 FOUNDATION_EXPORT void boom_crash_released_object(void);
 FOUNDATION_EXPORT void boom_crash_corrupt_malloc(void);
+FOUNDATION_EXPORT void boom_crash_unrecognized_selector(void);
+FOUNDATION_EXPORT void boom_crash_kvo(void);
+FOUNDATION_EXPORT void boom_crash_stack_smash(void);
 
 NS_ASSUME_NONNULL_END

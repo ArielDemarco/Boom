@@ -130,6 +130,26 @@ final class TriggerTests: XCTestCase {
     func test_corruptMalloc_terminatesWithSignal() throws {
         try assertTerminatesWithSignal("CorruptMallocCrash", signal: SIGTRAP)
     }
+
+    // release: same; doesNotRecognizeSelector: raises NSException which calls abort()
+    func test_unrecognizedSelector_terminatesWithSignal() throws {
+        try assertTerminatesWithSignal("UnrecognizedSelectorCrash", signal: SIGABRT)
+    }
+
+    // release: same; NSInternalInconsistencyException calls abort()
+    func test_kvo_terminatesWithSignal() throws {
+        try assertTerminatesWithSignal("KVOCrash", signal: SIGABRT)
+    }
+
+    // release: same; __stack_chk_fail calls abort()
+    func test_stackSmash_terminatesWithSignal() throws {
+        try assertTerminatesWithSignal("StackSmashCrash", signal: SIGABRT)
+    }
+
+    // MARK: - Memory
+
+    // OOMKillCrash is intentionally not tested here: on macOS the process uses swap
+    // and is never killed by the system. This crash is only meaningful on iOS via jetsam.
 }
 
 // MARK: - Helpers
@@ -175,15 +195,14 @@ private extension TriggerTests {
         let fm = FileManager.default
 
         // Search under each architecture directory (arm64-apple-macosx, x86_64-apple-macosx, etc.)
-        if let archs = try fm.contentsOfDirectory(atPath: buildDir.path) {
-            for arch in archs {
-                let candidate = buildDir
-                    .appendingPathComponent(arch)
-                    .appendingPathComponent("debug")
-                    .appendingPathComponent("BoomCrashRunner")
-                if fm.fileExists(atPath: candidate.path) {
-                    return candidate
-                }
+        let archs = try fm.contentsOfDirectory(atPath: buildDir.path)
+        for arch in archs {
+            let candidate = buildDir
+                .appendingPathComponent(arch)
+                .appendingPathComponent("debug")
+                .appendingPathComponent("BoomCrashRunner")
+            if fm.fileExists(atPath: candidate.path) {
+                return candidate
             }
         }
 

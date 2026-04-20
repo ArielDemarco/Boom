@@ -42,6 +42,7 @@ public final class CrashRegistry {
         register(SIGBUSCrash())
         register(SIGILLCrash())
         register(SIGFPECrash())
+        register(StackSmashCrash())
         // Thread
         register(DeadlockCrash())
         register(AsyncSafeThreadCrash())
@@ -49,7 +50,11 @@ public final class CrashRegistry {
         register(ObjCExceptionCrash())
         register(CXXExceptionCrash())
         register(ObjCMsgSendCrash())
+        register(UnrecognizedSelectorCrash())
+        register(KVOCrash())
         register(ReleasedObjectCrash())
         register(CorruptMallocCrash())
+        // Memory
+        register(OOMKillCrash())
     }
 }

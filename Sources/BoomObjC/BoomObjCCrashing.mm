@@ -63,3 +63,33 @@ void boom_crash_corrupt_malloc(void) {
     memset(buf - 8, 0xAA, 32);
     free(buf);
 }
+
+// MARK: - Unrecognized selector
+
+void boom_crash_unrecognized_selector(void) {
+    NSObject *obj = [[NSObject alloc] init];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    [obj performSelector:NSSelectorFromString(@"boomNonExistentMethod")];
+#pragma clang diagnostic pop
+}
+
+// MARK: - KVO: remove unregistered observer
+
+void boom_crash_kvo(void) {
+    NSObject *observed = [[NSObject alloc] init];
+    NSObject *observer = [[NSObject alloc] init];
+    // Removing an observer that was never registered triggers NSInternalInconsistencyException
+    [observed removeObserver:observer forKeyPath:@"boomKeyPath"];
+}
+
+// MARK: - Stack smash
+
+__attribute__((noinline))
+void boom_crash_stack_smash(void) {
+    volatile char buf[8];
+    // Write well past the buffer to corrupt the stack canary, triggering __stack_chk_fail on return
+    for (int i = 0; i < 256; i++) {
+        ((volatile char *)buf)[i] = (char)0xAA;
+    }
+}

@@ -31,8 +31,12 @@ private let crashes: [String: any Crash] = [
     "ObjCExceptionCrash": ObjCExceptionCrash(),
     "CXXExceptionCrash": CXXExceptionCrash(),
     "ObjCMsgSendCrash": ObjCMsgSendCrash(),
+    "UnrecognizedSelectorCrash": UnrecognizedSelectorCrash(),
+    "KVOCrash": KVOCrash(),
     "ReleasedObjectCrash": ReleasedObjectCrash(),
     "CorruptMallocCrash": CorruptMallocCrash(),
+    "OOMKillCrash": OOMKillCrash(),
+    "StackSmashCrash": StackSmashCrash(),
 ]
 
 let name = CommandLine.arguments.dropFirst().first ?? ""
