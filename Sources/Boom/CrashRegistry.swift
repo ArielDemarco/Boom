@@ -12,8 +12,10 @@ public final class CrashRegistry {
     public static let shared = CrashRegistry()
 
     private(set) var crashes: [any Crash] = []
+    let startupStorage: StartupCrashStorage
 
-    private init() {
+    internal init(startupStorage: StartupCrashStorage = .default) {
+        self.startupStorage = startupStorage
         registerDefaults()
     }
 

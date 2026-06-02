@@ -13,6 +13,7 @@ import Boom
 struct CrashListView: View {
     @State private var selectedCrash: (any Crash)?
     @State private var showConfirmation = false
+    @State private var scheduledCrash: (any Crash)? = CrashRegistry.shared.scheduledStartupCrash
 
     private var grouped: [(CrashCategory, [any Crash])] {
         CrashCategory.allCases.compactMap { category in
@@ -23,6 +24,9 @@ struct CrashListView: View {
 
     var body: some View {
         List {
+            if let scheduled = scheduledCrash {
+                scheduledBanner(for: scheduled)
+            }
             ForEach(grouped, id: \.0) { category, crashes in
                 Section(category.rawValue) {
                     ForEach(crashes, id: \.title) { crash in
@@ -43,6 +47,12 @@ struct CrashListView: View {
             Button("Trigger crash", role: .destructive) {
                 selectedCrash?.trigger()
             }
+            Button("Schedule on next launch") {
+                if let crash = selectedCrash {
+                    CrashRegistry.shared.scheduleStartupCrash(crash)
+                    scheduledCrash = crash
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             if let crash = selectedCrash {
@@ -53,6 +63,25 @@ struct CrashListView: View {
 
     private var confirmationTitle: String {
         selectedCrash.map { "Trigger: \($0.title)" } ?? ""
+    }
+
+    @ViewBuilder
+    private func scheduledBanner(for crash: any Crash) -> some View {
+        Section {
+            HStack {
+                Label(crash.title, systemImage: "clock.badge.exclamationmark")
+                    .font(.subheadline)
+                Spacer()
+                Button("Cancel") {
+                    CrashRegistry.shared.cancelScheduledStartupCrash()
+                    scheduledCrash = nil
+                }
+                .font(.subheadline)
+                .tint(.red)
+            }
+        } header: {
+            Text("Scheduled on next launch")
+        }
     }
 }
 
