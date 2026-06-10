@@ -43,8 +43,11 @@ struct PayloadView: View {
             }
 
             Section("Call Stack") {
-                NavigationLink("View full stack") {
+                NavigationLink("Threads") {
                     CallStackView(json: payload.callStackJSON)
+                }
+                NavigationLink("Binary Images") {
+                    BinaryImagesView(images: BinaryImageEntry.fromCallStackJSON(payload.callStackJSON))
                 }
             }
         }

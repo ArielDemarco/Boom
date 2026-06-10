@@ -15,8 +15,14 @@ private let log = Logger(subsystem: "com.ademarco.boomapp.crash-extension", cate
 @main
 struct BoomCrashExtension: CrashReporterExtension {
     func processCrashReport(process: CrashedProcess) {
-        log.info("processCrashReport invoked with exception: \(process.reason.exception), codes: \(process.reason.codes)")
-        CrashReportCapturer(process: process).captureAndSave()
+        log.info("processCrashReport invoked — exception: \(process.reason.exception), codes: \(process.reason.codes)")
+        let capturer = CrashReportCapturer(process: process)
+        let sema = DispatchSemaphore(value: 0)
+        Task.detached(priority: .userInitiated) {
+            await capturer.captureAndSave()
+            sema.signal()
+        }
+        sema.wait()
         log.info("processCrashReport finished")
     }
 }

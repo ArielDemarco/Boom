@@ -1,5 +1,5 @@
 //
-//  CrashReportsView.swift
+//  CallStackView.swift
 //  BoomApp
 //
 //  Copyright © 2026 Ariel Demarco. All rights reserved.
@@ -10,53 +10,36 @@ import SwiftUI
 
 struct CallStackView: View {
     let json: String
-    @State private var copied = false
+
+    private var threads: [CallStackThread] {
+        CallStackThread.parse(from: json).filter { !$0.frames.isEmpty }
+    }
 
     var body: some View {
-        ScrollView {
-            Text(prettyJSON ?? json)
-                .font(.system(.caption2, design: .monospaced))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-        }
-        .navigationTitle("Call Stack")
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    copyToClipboard(json)
-                    copied = true
-                    Task {
-                        try? await Task.sleep(for: .seconds(2))
-                        copied = false
+        Group {
+            if threads.isEmpty {
+                ContentUnavailableView("No stack trace", systemImage: "waveform.path.ecg")
+            } else {
+                List(threads) { thread in
+                    NavigationLink {
+                        CallStackThreadView(thread: thread)
+                    } label: {
+                        HStack {
+                            Text(thread.title)
+                            Spacer()
+                            if thread.isAttributed {
+                                Text("crashed")
+                                    .font(.caption2)
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(.red, in: Capsule())
+                            }
+                        }
                     }
-                } label: {
-                    Label(
-                        copied ? "Copied!" : "Copy",
-                        systemImage: copied ? "checkmark" : "doc.on.doc"
-                    )
                 }
             }
         }
+        .navigationTitle("Call Stacks")
     }
-
-    private func copyToClipboard(_ string: String) {
-        #if os(iOS)
-        UIPasteboard.general.string = string
-        #else
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(string, forType: .string)
-        #endif
-    }
-
-    private var prettyJSON: String? {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data),
-              let pretty = try? JSONSerialization.data(withJSONObject: obj, options: .prettyPrinted)
-        else { return nil }
-        return String(data: pretty, encoding: .utf8)
-    }
-}
-
-#Preview {
-    CallStackView(json: Thread.callStackSymbols.joined(separator: "\n"))
 }

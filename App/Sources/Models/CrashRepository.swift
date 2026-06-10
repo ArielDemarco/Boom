@@ -70,21 +70,18 @@ final class CrashRepository: @unchecked Sendable {
     // MARK: - Payload
     
     func loadPayload(for summary: CrashReportSummary) -> CrashPayload? {
-        do {
-            let data = try Data(contentsOf: url(for: summary.filename))
-            
-            if let payload = try? decoder.decode(CrashReportPayload.self, from: data) {
-                return .structured(payload)
-            }
-            
-            let dump = try decoder.decode(ExtensionCrashDump.self, from: data)
-            let json = (try? encoder.encode(dump)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
-            return .dump(json)
+        guard let data = try? Data(contentsOf: url(for: summary.filename)) else { return nil }
+
+        if let payload = try? decoder.decode(CrashReportPayload.self, from: data) {
+            return .structured(payload)
         }
-        catch let exception {
-            print(exception.localizedDescription)
-            return nil
-        }
+        
+        let json = (try? JSONSerialization.jsonObject(with: data))
+            .flatMap { try? JSONSerialization.data(withJSONObject: $0, options: .prettyPrinted) }
+            .flatMap { String(data: $0, encoding: .utf8) }
+            ?? String(data: data, encoding: .utf8)
+            ?? "{}"
+        return .dump(json)
     }
     
     // MARK: - Read state

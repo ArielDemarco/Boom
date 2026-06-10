@@ -6,7 +6,15 @@
 //  Licensed under the MIT License.
 //
 
+#if !targetEnvironment(simulator)
+import CrashReportExtension
 import Foundation
+
+struct ThreadCapture: Codable {
+    let name: String?
+    let frameGroups: [[SymbolicatedFrame]]
+    let frameAddresses: [UInt64]
+}
 
 struct ExtensionCrashPayload: Codable {
     struct Reason: Codable {
@@ -25,8 +33,10 @@ struct ExtensionCrashPayload: Codable {
     let reason: Reason
     let binaryImages: [BinaryImage]
     let corpsePort: UInt32
+    let threads: [ThreadCapture]
     let osVersion: String
     let deviceType: String
     let architecture: String
     let appVersion: String
 }
+#endif
