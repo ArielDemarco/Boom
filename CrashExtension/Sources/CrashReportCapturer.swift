@@ -14,7 +14,7 @@ import os
 
 private let log = Logger(subsystem: "com.ademarco.boomapp.crash-extension", category: "StackWalk")
 
-// C macros not importable in Swift — computed manually
+// C macros not importable in Swift so we generate them computed manually
 private let kARM_THREAD_STATE64_COUNT = mach_msg_type_number_t(
     MemoryLayout<arm_thread_state64_t>.size / MemoryLayout<UInt32>.size
 )

@@ -145,7 +145,7 @@ struct CrashDumpView: View {
 // MARK: - Binary lookup
 //
 // The `size` field from BinaryImageInfo covers the full shared cache VM region,
-// not the actual binary size — so range checks using base+size produce false matches.
+// not the actual binary size; so range checks using base+size produce false matches.
 // Instead, sort by base address and pick the largest base ≤ address (like atos/lldb do).
 
 private struct BinaryImageLookup {
