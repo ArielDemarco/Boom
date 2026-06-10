@@ -83,7 +83,8 @@ extension MetricKitManager: MXMetricManagerSubscriber {
                     date: payload.timeStampEnd,
                     signal: diagnostic.signal?.intValue,
                     exceptionType: diagnostic.exceptionType?.intValue,
-                    isRead: false
+                    isRead: false,
+                    source: .metricKit
                 )
                 let fullPayload = CrashReportPayload(
                     sessionStart: payload.timeStampBegin,

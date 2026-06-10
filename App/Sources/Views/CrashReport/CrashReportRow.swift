@@ -22,6 +22,13 @@ struct CrashReportRow: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                    Spacer()
+                    Text(summary.source.label)
+                        .font(.caption2)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(.quaternary, in: Capsule())
+                        .foregroundStyle(.secondary)
                 }
                 Text(summary.formattedDate)
                     .font(.caption)

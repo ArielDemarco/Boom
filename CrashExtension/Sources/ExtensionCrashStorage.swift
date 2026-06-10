@@ -33,7 +33,7 @@ struct ExtensionCrashStorage {
             
             let id = UUID()
             let epochMs = Int(Date().timeIntervalSince1970 * 1000)
-            let filename = "\(id.uuidString)_\(epochMs)_nil_\(exception).json"
+            let filename = "ext_\(id.uuidString)_\(epochMs)_nil_\(exception).json"
             let dest = dir.appendingPathComponent(filename)
             
             guard let data = try? JSONEncoder().encode(payload) else {

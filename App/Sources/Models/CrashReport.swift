@@ -8,6 +8,22 @@
 
 import Foundation
 
+// MARK: - Source
+
+enum ReportSource: String {
+    case metricKit = "mk"
+    case crashExtension = "ext"
+    case unknown = "unk"
+
+    var label: String {
+        switch self {
+        case .metricKit:       "MetricKit"
+        case .crashExtension:  "CrashExt"
+        case .unknown:         "Unknown"
+        }
+    }
+}
+
 // MARK: - Summary (derived from filename, no file reads for the list)
 
 struct CrashReportSummary: Identifiable {
@@ -15,8 +31,8 @@ struct CrashReportSummary: Identifiable {
     let date: Date
     let signal: Int?
     let exceptionType: Int?
+    let source: ReportSource
     var isRead: Bool
-    // Stored so file operations always use the exact name from dis
     let filename: String
 
     init(
@@ -24,32 +40,51 @@ struct CrashReportSummary: Identifiable {
         date: Date,
         signal: Int?,
         exceptionType: Int?,
-        isRead: Bool
+        isRead: Bool,
+        source: ReportSource = .unknown
     ) {
         self.id = id
         self.date = date
         self.signal = signal
         self.exceptionType = exceptionType
+        self.source = source
         self.isRead = isRead
         let sig = signal.map(String.init) ?? "nil"
         let exc = exceptionType.map(String.init) ?? "nil"
-        self.filename = "\(id.uuidString)_\(Int(date.timeIntervalSince1970 * 1000))_\(sig)_\(exc).json"
+        self.filename = "\(source.rawValue)_\(id.uuidString)_\(Int(date.timeIntervalSince1970 * 1000))_\(sig)_\(exc).json"
     }
 
-    init?(
-        filename: String,
-        isRead: Bool
-    ) {
+    // Parses both new format (source_UUID_epochMs_signal_exc.json)
+    // and legacy format (UUID_epochMs_signal_exc.json).
+    init?(filename: String, isRead: Bool) {
         let name = filename.replacingOccurrences(of: ".json", with: "")
-        let parts = name.split(separator: "_", maxSplits: 3)
-        guard parts.count == 4,
-              let id = UUID(uuidString: String(parts[0])),
-              let epochMs = Int(parts[1]) else { return nil }
 
+        // Try new format first (5 parts with source prefix)
+        let parts5 = name.split(separator: "_", maxSplits: 4)
+        if parts5.count == 5,
+           let src = ReportSource(rawValue: String(parts5[0])),
+           let id = UUID(uuidString: String(parts5[1])),
+           let epochMs = Int(parts5[2]) {
+            self.id = id
+            self.date = Date(timeIntervalSince1970: TimeInterval(epochMs) / 1000)
+            self.signal = Int(parts5[3])
+            self.exceptionType = Int(parts5[4])
+            self.source = src
+            self.isRead = isRead
+            self.filename = filename
+            return
+        }
+
+        // Legacy format (no source prefix)
+        let parts4 = name.split(separator: "_", maxSplits: 3)
+        guard parts4.count == 4,
+              let id = UUID(uuidString: String(parts4[0])),
+              let epochMs = Int(parts4[1]) else { return nil }
         self.id = id
         self.date = Date(timeIntervalSince1970: TimeInterval(epochMs) / 1000)
-        self.signal = Int(parts[2])
-        self.exceptionType = Int(parts[3])
+        self.signal = Int(parts4[2])
+        self.exceptionType = Int(parts4[3])
+        self.source = .unknown
         self.isRead = isRead
         self.filename = filename
     }

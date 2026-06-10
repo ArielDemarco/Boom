@@ -18,7 +18,9 @@ let project = Project(
             bundleId: "com.ademarco.boomapp",
             deploymentTargets: .multiplatform(iOS: "18.0", macOS: "15.0"),
             infoPlist: .extendingDefault(with: [
-                "UILaunchScreen": .dictionary(["UIImageName": .string("")])
+                "UILaunchScreen": .dictionary(["UIImageName": .string("")]),
+                "UIFileSharingEnabled": .boolean(true),
+                "LSSupportsOpeningDocumentsInPlace": .boolean(true)
             ]),
             sources: ["App/Sources/**"],
             resources: ["App/Resources/**"],

@@ -29,8 +29,8 @@ final class CrashRepository: @unchecked Sendable {
         self.fileManager = fileManager
         self.defaults = defaults
         
-        let support = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        directory = support.appendingPathComponent("BoomApp/crashes", isDirectory: true)
+        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        directory = documents.appendingPathComponent("crashes", isDirectory: true)
         try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
     }
     
