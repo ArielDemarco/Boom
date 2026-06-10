@@ -6,7 +6,6 @@
 //  Licensed under the MIT License.
 //
 
-#if os(iOS)
 import SwiftUI
 
 struct PayloadView: View {
@@ -76,4 +75,3 @@ struct PayloadView: View {
         )
     )
 }
-#endif

@@ -6,7 +6,6 @@
 //  Licensed under the MIT License.
 //
 
-#if os(iOS)
 import SwiftUI
 
 struct CrashReportRow: View {
@@ -44,4 +43,3 @@ struct CrashReportRow: View {
     Spacer()
     CrashReportRow(summary: .init(id: .init(), date: .now, signal: 7, exceptionType: 11, isRead: false))
 }
-#endif

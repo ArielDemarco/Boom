@@ -6,7 +6,6 @@
 //  Licensed under the MIT License.
 //
 
-#if os(iOS)
 import SwiftUI
 
 struct CrashReportDetailView: View {
@@ -25,8 +24,11 @@ struct CrashReportDetailView: View {
                     ProgressView("Loading report…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                case .loaded(let payload):
+                case .loaded(.structured(let payload)):
                     PayloadView(summary: summary, payload: payload)
+
+                case .loaded(.dump(let json)):
+                    CrashDumpView(json: json)
 
                 case .failed:
                     ContentUnavailableView(
@@ -44,8 +46,11 @@ struct CrashReportDetailView: View {
             }
         }
         .task {
-            let result = await manager.loadPayload(for: summary)
-            state = result.map { .loaded($0) } ?? .failed
+            guard let payload = await manager.loadPayload(for: summary) else {
+                state = .failed
+                return
+            }
+            state = .loaded(payload)
         }
     }
 }
@@ -61,4 +66,3 @@ struct CrashReportDetailView: View {
         )
     )
 }
-#endif

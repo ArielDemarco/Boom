@@ -12,6 +12,6 @@ protocol MetricKitManaging: AnyObject, Observable, Sendable {
     @MainActor var summaries: [CrashReportSummary] { get }
     @MainActor func delete(_ summary: CrashReportSummary)
     @MainActor func deleteAll()
-    func loadPayload(for summary: CrashReportSummary) async -> CrashReportPayload?
+    func loadPayload(for summary: CrashReportSummary) async -> CrashPayload?
     @MainActor func markAsRead(_ summary: CrashReportSummary)
 }

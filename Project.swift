@@ -1,5 +1,7 @@
 import ProjectDescription
 
+let appGroupID = "group.com.ademarco.boomapp"
+
 let project = Project(
     name: "BoomApp",
     packages: [
@@ -20,8 +22,12 @@ let project = Project(
             ]),
             sources: ["App/Sources/**"],
             resources: ["App/Resources/**"],
+            entitlements: .dictionary([
+                "com.apple.security.application-groups": .array([.string(appGroupID)])
+            ]),
             dependencies: [
-                .package(product: "Boom")
+                .package(product: "Boom"),
+                .target(name: "BoomCrashExtension"),
             ],
             settings: .settings(
                 base: [
@@ -33,6 +39,31 @@ let project = Project(
                     .release(name: "Release", xcconfig: "Configs/Local.xcconfig"),
                 ]
             )
-        )
+        ),
+        .target(
+            name: "BoomCrashExtension",
+            destinations: [.mac, .iPhone, .iPad],
+            product: .extensionKitExtension,
+            bundleId: "com.ademarco.boomapp.crash-extension",
+            deploymentTargets: .multiplatform(iOS: "27.0", macOS: "27.0"),
+            infoPlist: .extendingDefault(with: [
+                "EXAppExtensionAttributes": .dictionary([
+                    "EXExtensionPointIdentifier": .string("com.apple.crash-reporter.extension")
+                ])
+            ]),
+            sources: ["CrashExtension/Sources/**"],
+            entitlements: .dictionary([
+                "com.apple.security.application-groups": .array([.string(appGroupID)])
+            ]),
+            settings: .settings(
+                base: [
+                    "CODE_SIGN_STYLE": "Automatic"
+                ],
+                configurations: [
+                    .debug(name: "Debug", xcconfig: "Configs/Local.xcconfig"),
+                    .release(name: "Release", xcconfig: "Configs/Local.xcconfig"),
+                ]
+            )
+        ),
     ]
 )

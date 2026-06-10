@@ -18,13 +18,11 @@ struct MainView: View {
                         .navigationTitle("Boom")
                 }
             }
-            #if os(iOS)
             Tab("Reports", systemImage: "doc.text.magnifyingglass") {
                 NavigationStack {
                     CrashReportsView()
                 }
             }
-            #endif
         }
     }
 }

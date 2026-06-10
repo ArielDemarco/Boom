@@ -26,7 +26,8 @@ final class MetricKitManager: NSObject, MetricKitManaging {
         MXMetricManager.shared.add(self)
         Task {
             let loaded = await Task.detached(priority: .utility) {
-                repository.loadSummaries()
+                repository.importExtensionReports()
+                return repository.loadSummaries()
             }.value
             self.summaries = loaded
         }
@@ -49,7 +50,7 @@ final class MetricKitManager: NSObject, MetricKitManaging {
         }
     }
 
-    func loadPayload(for summary: CrashReportSummary) async -> CrashReportPayload? {
+    func loadPayload(for summary: CrashReportSummary) async -> CrashPayload? {
         let repo = repository
         return await Task.detached(priority: .userInitiated) {
             repo.loadPayload(for: summary)

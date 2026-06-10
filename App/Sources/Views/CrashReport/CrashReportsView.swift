@@ -6,7 +6,6 @@
 //  Licensed under the MIT License.
 //
 
-#if os(iOS)
 import SwiftUI
 
 struct CrashReportsView: View {
@@ -16,11 +15,13 @@ struct CrashReportsView: View {
     var body: some View {
         Group {
             if manager.summaries.isEmpty {
-                ContentUnavailableView(
-                    "No crash reports",
-                    systemImage: "checkmark.shield",
-                    description: Text("MetricKit delivers reports from the previous session on next launch. Crashes on Simulator are not captured.")
-                )
+                ScrollView {
+                    ContentUnavailableView(
+                        "No crash reports",
+                        systemImage: "checkmark.shield",
+                        description: Text("Reports are captured by the crash extension and imported on launch. Pull to check for new ones.")
+                    )
+                }
             } else {
                 List {
                     ForEach(manager.summaries) { summary in
@@ -39,7 +40,7 @@ struct CrashReportsView: View {
         .navigationTitle("Crash Reports")
         .toolbar {
             if !manager.summaries.isEmpty {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button("Clear all", role: .destructive) {
                         manager.deleteAll()
                     }
@@ -55,4 +56,3 @@ struct CrashReportsView: View {
 #Preview {
     CrashReportsView()
 }
-#endif

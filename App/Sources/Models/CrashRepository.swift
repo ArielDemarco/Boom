@@ -6,32 +6,36 @@
 //  Licensed under the MIT License.
 //
 
-#if os(iOS)
 import Foundation
 
 final class CrashRepository: @unchecked Sendable {
     private let fileManager: FileManager
     private let defaults: UserDefaults
     private let directory: URL
-    private let encoder: JSONEncoder = .init()
+    private let encoder: JSONEncoder = {
+        let encoder: JSONEncoder = .init()
+        encoder.outputFormatting = .prettyPrinted
+        return encoder
+    }()
     private let decoder: JSONDecoder = .init()
-
+    
+    
     private static let readIDsKey = "boom.readCrashIDs"
-
+    
     init(
         fileManager: FileManager = .default,
         defaults: UserDefaults = .init(suiteName: "com.ademarco.bombapp.crashes") ?? .standard
     ) {
         self.fileManager = fileManager
         self.defaults = defaults
-
+        
         let support = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         directory = support.appendingPathComponent("BoomApp/crashes", isDirectory: true)
         try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
     }
-
+    
     // MARK: - Summaries
-
+    
     func loadSummaries() -> [CrashReportSummary] {
         do {
             return try fileManager.contentsOfDirectory(atPath: directory.path)
@@ -44,7 +48,7 @@ final class CrashRepository: @unchecked Sendable {
             return []
         }
     }
-
+    
     func save(payload: CrashReportPayload, filename: String) {
         do {
             let data = try encoder.encode(payload)
@@ -53,48 +57,100 @@ final class CrashRepository: @unchecked Sendable {
             print(exception.localizedDescription)
         }
     }
-
+    
     func delete(_ summary: CrashReportSummary) {
         try? fileManager.removeItem(at: url(for: summary.filename))
     }
-
+    
     func deleteAll(_ summaries: [CrashReportSummary]) {
         summaries.forEach { try? fileManager.removeItem(at: url(for: $0.filename)) }
         defaults.removeObject(forKey: Self.readIDsKey)
     }
-
+    
     // MARK: - Payload
-
-    func loadPayload(for summary: CrashReportSummary) -> CrashReportPayload? {
+    
+    func loadPayload(for summary: CrashReportSummary) -> CrashPayload? {
         do {
             let data = try Data(contentsOf: url(for: summary.filename))
-            return try decoder.decode(CrashReportPayload.self, from: data)
-        } catch let exception {
+            
+            if let payload = try? decoder.decode(CrashReportPayload.self, from: data) {
+                return .structured(payload)
+            }
+            
+            let dump = try decoder.decode(ExtensionCrashDump.self, from: data)
+            let json = (try? encoder.encode(dump)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+            return .dump(json)
+        }
+        catch let exception {
             print(exception.localizedDescription)
             return nil
         }
     }
-
+    
     // MARK: - Read state
-
+    
     func markRead(_ id: UUID) {
         var ids = readIDs
         ids.insert(id.uuidString)
         defaults.set(Array(ids), forKey: Self.readIDsKey)
     }
-
+    
     func isRead(_ id: UUID) -> Bool {
         readIDs.contains(id.uuidString)
     }
-
+    
+    // MARK: - Extension import
+    
+    // Moves crash reports written by BoomCrashExtension from the App Group
+    // shared container into the app's crashes directory so they appear in the
+    // Reports tab alongside MetricKit reports.
+    func importExtensionReports() {
+        guard let container = fileManager.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.ademarco.boomapp"
+        ) else { return }
+        
+        do {
+            let source = container.appendingPathComponent("crashes", isDirectory: true)
+            let files = try fileManager.contentsOfDirectory(atPath: source.path)
+            
+            for filename in files where filename.hasSuffix(".json") {
+                let from = source.appendingPathComponent(filename)
+                let to = directory.appendingPathComponent(filename)
+                try fileManager.moveItem(at: from, to: to)
+            }
+        } catch let exception {
+            print(exception.localizedDescription)
+        }
+    }
+    
     // MARK: - Private
-
+    
     private func url(for filename: String) -> URL {
         directory.appendingPathComponent(filename)
     }
-
+    
     private var readIDs: Set<String> {
         Set(defaults.stringArray(forKey: Self.readIDsKey) ?? [])
     }
 }
-#endif
+
+private struct ExtensionCrashDump: Codable {
+    struct Reason: Codable {
+        let exception: Int32
+        let codes: [UInt64]
+    }
+    struct BinaryImage: Codable {
+        let path: String
+        let uuid: String?
+        let baseAddress: String
+        let size: UInt64
+    }
+    let capturedAt: Double
+    let reason: Reason
+    let binaryImages: [BinaryImage]
+    let corpsePort: UInt32
+    let osVersion: String
+    let deviceType: String
+    let architecture: String
+    let appVersion: String
+}

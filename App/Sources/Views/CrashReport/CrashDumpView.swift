@@ -1,5 +1,5 @@
 //
-//  CrashReportsView.swift
+//  CrashDumpView.swift
 //  BoomApp
 //
 //  Copyright © 2026 Ariel Demarco. All rights reserved.
@@ -8,18 +8,18 @@
 
 import SwiftUI
 
-struct CallStackView: View {
+struct CrashDumpView: View {
     let json: String
     @State private var copied = false
 
     var body: some View {
         ScrollView {
-            Text(prettyJSON ?? json)
+            Text(json)
                 .font(.system(.caption2, design: .monospaced))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
         }
-        .navigationTitle("Call Stack")
+        .navigationTitle("Crash Dump")
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
@@ -47,16 +47,4 @@ struct CallStackView: View {
         NSPasteboard.general.setString(string, forType: .string)
         #endif
     }
-
-    private var prettyJSON: String? {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data),
-              let pretty = try? JSONSerialization.data(withJSONObject: obj, options: .prettyPrinted)
-        else { return nil }
-        return String(data: pretty, encoding: .utf8)
-    }
-}
-
-#Preview {
-    CallStackView(json: Thread.callStackSymbols.joined(separator: "\n"))
 }
