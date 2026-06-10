@@ -45,7 +45,7 @@ struct CrashReportDetailView: View {
                 }
             }
         }
-        .task {
+        .task(priority: .userInitiated) {
             guard let payload = await manager.loadPayload(for: summary) else {
                 state = .failed
                 return

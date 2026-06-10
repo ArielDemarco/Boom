@@ -39,11 +39,9 @@ final class ExtensionCrashManager: MetricKitManaging, @unchecked Sendable {
         Task.detached(priority: .utility) { repo.deleteAll(snapshot) }
     }
 
-    func loadPayload(for summary: CrashReportSummary) async -> CrashPayload? {
-        let repo = repository
-        return await Task.detached(priority: .userInitiated) {
-            repo.loadPayload(for: summary)
-        }.value
+    nonisolated func loadPayload(for summary: CrashReportSummary) async -> CrashPayload? {
+        let repo = await MainActor.run { repository }
+        return repo.loadPayload(for: summary)
     }
 
     func markAsRead(_ summary: CrashReportSummary) {

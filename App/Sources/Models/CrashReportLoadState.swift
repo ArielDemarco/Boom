@@ -5,7 +5,7 @@
 //  Created by Ariel Demarco on 18/04/2026.
 //
 
-enum CrashPayload {
+enum CrashPayload: Sendable {
     case structured(CrashReportPayload)
     case dump(String)
 }

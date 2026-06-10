@@ -35,7 +35,7 @@ struct CrashReportCapturer {
             architecture: cpuArchitecture,
             appVersion: bundleVersion
         )
-        ExtensionCrashStorage.save(payload, exception: Int(process.reason.exception))
+        ExtensionCrashStorage().save(payload, exception: Int(process.reason.exception))
     }
 
     private var bundleVersion: String {

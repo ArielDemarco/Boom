@@ -15,7 +15,7 @@ final class NoopMetricKitManager: MetricKitManaging, @unchecked Sendable {
     @MainActor private(set) var summaries: [CrashReportSummary] = []
     @MainActor func delete(_ summary: CrashReportSummary) {}
     @MainActor func deleteAll() {}
-    func loadPayload(for summary: CrashReportSummary) async -> CrashPayload? { nil }
+    nonisolated func loadPayload(for summary: CrashReportSummary) async -> CrashPayload? { nil }
     @MainActor func markAsRead(_ summary: CrashReportSummary) {}
     @MainActor func reload() async {}
 }
