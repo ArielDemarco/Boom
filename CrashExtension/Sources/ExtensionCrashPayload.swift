@@ -38,5 +38,6 @@ struct ExtensionCrashPayload: Codable {
     let deviceType: String
     let architecture: String
     let appVersion: String
+    let crashContext: CapturedCrashContext?
 }
 #endif

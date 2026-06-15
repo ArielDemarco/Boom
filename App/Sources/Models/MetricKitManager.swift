@@ -24,6 +24,8 @@ final class MetricKitManager: NSObject, MetricKitManaging {
         self.summaries = summaries
         super.init()
         MXMetricManager.shared.add(self)
+        CrashContextRegistry.register()
+        CrashContextRegistry.update(sessionId: UUID())
         Task {
             let loaded = await Task.detached(priority: .utility) {
                 repository.importExtensionReports()

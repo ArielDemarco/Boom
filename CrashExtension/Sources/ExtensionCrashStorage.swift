@@ -6,6 +6,7 @@
 //  Licensed under the MIT License.
 //
 
+#if !targetEnvironment(simulator)
 import Foundation
 import os
 
@@ -48,3 +49,4 @@ struct ExtensionCrashStorage {
         }
     }
 }
+#endif

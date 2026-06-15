@@ -35,6 +35,11 @@ struct CrashReportCapturer: @unchecked Sendable {
             log.warning("Stack walk failed: \(error)")
         }
 
+        let crashContext = readCrashContext(from: process)
+        if crashContext == nil {
+            log.info("No crash context found (SDK not initialized or no app group)")
+        }
+
         let payload = ExtensionCrashPayload(
             capturedAt: Date().timeIntervalSince1970,
             reason: .init(
@@ -54,7 +59,8 @@ struct CrashReportCapturer: @unchecked Sendable {
             osVersion: osVersionString,
             deviceType: hardwareModel,
             architecture: cpuArchitecture,
-            appVersion: bundleVersion
+            appVersion: bundleVersion,
+            crashContext: crashContext
         )
         ExtensionCrashStorage().save(payload, exception: Int(process.reason.exception))
     }

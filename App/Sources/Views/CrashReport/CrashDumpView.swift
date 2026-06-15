@@ -84,6 +84,29 @@ struct CrashDumpView: View {
                     if let version = p["appVersion"] as? String { LabeledContent("App version", value: version) }
                 }
 
+                if let ctx = p["crashContext"] as? [String: Any] {
+                    Section("Session Context") {
+                        if let sessionId = ctx["sessionId"] as? String {
+                            LabeledContent("Session ID", value: sessionId)
+                        }
+                        if let userId = ctx["userId"] as? String {
+                            LabeledContent("User ID", value: userId)
+                        }
+                        if let entries = ctx["metadata"] as? [[String: Any]], !entries.isEmpty {
+                            ForEach(entries.indices, id: \.self) { i in
+                                let entry = entries[i]
+                                if let key = entry["key"] as? String {
+                                    if let sv = entry["stringValue"] as? String {
+                                        LabeledContent(key, value: sv)
+                                    } else if let iv = entry["intValue"] as? Int {
+                                        LabeledContent(key, value: "\(iv)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 let threads = extThreads
                 if !threads.isEmpty {
                     Section("Threads (\(threads.count))") {

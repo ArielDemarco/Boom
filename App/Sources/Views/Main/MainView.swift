@@ -23,6 +23,11 @@ struct MainView: View {
                     CrashReportsView()
                 }
             }
+            Tab("Context", systemImage: "tag") {
+                NavigationStack {
+                    ContextView()
+                }
+            }
         }
     }
 }
