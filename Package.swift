@@ -18,7 +18,6 @@ let package = Package(
             name: "BoomObjC",
             path: "Sources/BoomObjC",
             publicHeadersPath: "include",
-            cxxSettings: [.unsafeFlags(["-std=c++17"])]
         ),
         .executableTarget(
             name: "BoomCrashRunner",
